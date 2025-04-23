@@ -1,0 +1,97 @@
+import ccxt
+import time
+import random
+import logging
+import requests
+
+# === CONFIGURATION ===
+api_key = 'YOUR_BITGET_API_KEY'
+secret = 'YOUR_BITGET_API_SECRET'
+password = 'YOUR_API_PASSPHRASE'  # Only needed if using Bitget's 3rd parameter
+
+telegram_token = 'YOUR_TELEGRAM_BOT_TOKEN'
+telegram_chat_id = 'YOUR_TELEGRAM_CHAT_ID'
+
+symbol = 'PAWS/USDT'  # Target trading pair
+base_amount = 10       # Base amount in USDT per round (e.g., $10 per trade)
+max_volume = 505       # Stop after this total volume (USDT)
+
+# === SETUP LOGGER ===
+logging.basicConfig(filename='trade_log.txt', level=logging.INFO)
+
+# === SETUP BITGET (via CCXT) ===
+exchange = ccxt.bitget({
+    'apiKey': api_key,
+    'secret': secret,
+    'password': password,
+    'enableRateLimit': True,
+    'options': {
+        'defaultType': 'spot',
+    }
+})
+
+# === TELEGRAM ALERT ===
+def send_telegram(message):
+    try:
+        url = f'https://api.telegram.org/bot{telegram_token}/sendMessage'
+        payload = {
+            'chat_id': telegram_chat_id,
+            'text': message,
+            'parse_mode': 'Markdown'
+        }
+        requests.post(url, data=payload)
+    except Exception as e:
+        print(f"Telegram Error: {e}")
+
+# === LOGGING ===
+def log_trade(msg):
+    logging.info(f"{time.ctime()} - {msg}")
+
+# === MARKET ORDER TRADING ===
+def place_order():
+    global total_volume
+
+    try:
+        ticker = exchange.fetch_ticker(symbol)
+        market_price = ticker['last']
+
+        # Random USD amount between 9–11
+        usd_amount = round(random.uniform(base_amount - 1, base_amount + 1), 2)
+        amount = round(usd_amount / market_price, 6)
+
+        # Market Buy
+        buy_order = exchange.create_market_buy_order(symbol, amount)
+        msg_buy = f"MARKET BUY: {amount} PAWS at ~${market_price} (≈ ${usd_amount})"
+        print(msg_buy)
+        log_trade(msg_buy)
+        send_telegram(msg_buy)
+
+        total_volume += usd_amount
+
+        time.sleep(random.uniform(1.5, 3.5))
+
+        # Market Sell
+        sell_order = exchange.create_market_sell_order(symbol, amount)
+        msg_sell = f"MARKET SELL: {amount} PAWS at ~${market_price}"
+        print(msg_sell)
+        log_trade(msg_sell)
+        send_telegram(msg_sell)
+
+    except Exception as e:
+        error_msg = f"Trade error: {e}"
+        print(error_msg)
+        log_trade(error_msg)
+        send_telegram(error_msg)
+
+# === MAIN LOOP ===
+total_volume = 0
+while total_volume < max_volume:
+    place_order()
+    delay = random.uniform(10, 20)  # Adjust delay between trades
+    time.sleep(delay)
+
+# Final message
+final_msg = f"✅ Done trading. Total volume: ${round(total_volume, 2)}"
+print(final_msg)
+send_telegram(final_msg)
+log_trade(final_msg)
