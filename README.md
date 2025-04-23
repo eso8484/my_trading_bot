@@ -50,14 +50,16 @@ Open bot.py and update these lines with your actual values:
 - telegram_token = **`'YOUR_TELEGRAM_BOT_TOKEN'`**
 - telegram_chat_id = **`'YOUR_TELEGRAM_CHAT_ID'`**
 
-### 3. Run Locally (Optional)
+## Methods of Running the Script
+
+### 1. Run Locally (Optional)
 
 ```bash
 pip install -r requirements.txt
 python bot.py
 ```
 
-### 🐳 Run with Docker (Recommended)
+### 2. 🐳 Run with Docker (Recommended)
 
 - Step 1: Build the Docker Image
 
