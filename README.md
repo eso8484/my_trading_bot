@@ -79,7 +79,7 @@ python bot.py
 
 ---
 ```
-bitget-bot/
+my_trading_bot/
 │
 ├── bot.py              # Main trading bot script
 ├── requirements.txt    # Python dependencies
