@@ -77,6 +77,7 @@ python bot.py
 
 ## File Structure
 
+---
 bitget-bot/
 │
 ├── bot.py              # Main trading bot script
