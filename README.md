@@ -64,12 +64,12 @@ python bot.py
 - Step 1: Build the Docker Image
 
     ```bash
-    docker build -t bitget-bot .
+    docker build -t my_trading_bot .
     ```
 - Step 2: Run the Container
 
     ```bash
-    docker run -d --name my-bitget-bot bitget-bot
+    docker run -d --name my-bitget-bot my_trading_bot
     ```
 - Step 3: Monitor Logs
 
