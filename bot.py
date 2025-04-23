@@ -3,14 +3,20 @@ import time
 import random
 import logging
 import requests
+import os
+from dotenv import load_dotenv
 
-# === CONFIGURATION ===
-api_key = 'YOUR_BITGET_API_KEY'
-secret = 'YOUR_BITGET_API_SECRET'
-password = 'YOUR_API_PASSPHRASE'  # Only needed if using Bitget's 3rd parameter
+# Load from .env file
+load_dotenv()
 
-telegram_token = 'YOUR_TELEGRAM_BOT_TOKEN'
-telegram_chat_id = 'YOUR_TELEGRAM_CHAT_ID'
+# Fetch credentials securely
+api_key = os.getenv('BITGET_API_KEY')
+secret = os.getenv('BITGET_API_SECRET')
+password = os.getenv('BITGET_API_PASSPHRASE')
+
+telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
+telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
+
 
 symbol = 'PAWS/USDT'  # Target trading pair
 base_amount = 10       # Base amount in USDT per round (e.g., $10 per trade)
