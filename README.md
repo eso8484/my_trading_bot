@@ -78,7 +78,8 @@ python bot.py
 ## File Structure
 
 ---
-```bitget-bot/
+```
+bitget-bot/
 │
 ├── bot.py              # Main trading bot script
 ├── requirements.txt    # Python dependencies
