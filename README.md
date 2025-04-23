@@ -78,13 +78,14 @@ python bot.py
 ## File Structure
 
 ---
-bitget-bot/
+```bitget-bot/
 │
 ├── bot.py              # Main trading bot script
 ├── requirements.txt    # Python dependencies
 ├── Dockerfile          # Docker build instructions
 ├── trade_log.txt       # Trade history log (auto-created)
 └── README.md           # This file
+```
 
 ---
 ## **🌐 Connect With Me**
