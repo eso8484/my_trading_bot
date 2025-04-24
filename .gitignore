@@ -1,2 +1,2 @@
 .env
-rsa_private_key.pem
+*.pem
