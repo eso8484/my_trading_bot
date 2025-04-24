@@ -39,7 +39,7 @@ def load_rsa_private_key(pem_file_path):
 rsa_private_key = load_rsa_private_key(pem_file_path)
 
 symbol = 'PAWS/USDT'  # Target trading pair
-base_amount = 10      # Base amount in USDT per round (e.g., $10 per trade)
+base_amount = 2      # Base amount in USDT per round (e.g., $10 per trade)
 max_volume = 505      # Stop after this total volume (USDT)
 
 # === SETUP LOGGER ===
