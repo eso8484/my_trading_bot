@@ -5,22 +5,42 @@ import logging
 import requests
 import os
 from dotenv import load_dotenv
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
 
 # Load from .env file
 load_dotenv()
 
 # Fetch credentials securely
 api_key = os.getenv('BITGET_API_KEY')
-secret = os.getenv('BITGET_API_SECRET')
 password = os.getenv('BITGET_API_PASSPHRASE')
+pem_file_path = os.getenv('BITGET_PEM_FILE_PATH')  # Path to .pem file
 
-telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
-telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
+# Load RSA private key from .pem file
+def load_rsa_private_key(pem_file_path):
+    try:
+        with open(pem_file_path, 'rb') as key_file:
+            private_key = serialization.load_pem_private_key(
+                key_file.read(),
+                password=None,  # Assume unencrypted; adjust if encrypted
+                backend=default_backend()
+            )
+        # Convert to PEM format as bytes for CCXT
+        pem_key = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode('utf-8')
+        return pem_key
+    except Exception as e:
+        raise ValueError(f"Failed to load RSA private key from {pem_file_path}: {e}")
 
+# Load the RSA private key
+rsa_private_key = load_rsa_private_key(pem_file_path)
 
 symbol = 'PAWS/USDT'  # Target trading pair
-base_amount = 10       # Base amount in USDT per round (e.g., $10 per trade)
-max_volume = 505       # Stop after this total volume (USDT)
+base_amount = 10      # Base amount in USDT per round (e.g., $10 per trade)
+max_volume = 505      # Stop after this total volume (USDT)
 
 # === SETUP LOGGER ===
 logging.basicConfig(filename='trade_log.txt', level=logging.INFO)
@@ -28,8 +48,8 @@ logging.basicConfig(filename='trade_log.txt', level=logging.INFO)
 # === SETUP BITGET (via CCXT) ===
 exchange = ccxt.bitget({
     'apiKey': api_key,
-    'secret': secret,
-    'password': password,
+    'rsaPrivateKey': rsa_private_key,  # Use RSA private key instead of secret
+    'password': password,  # Passphrase, if required by Bitget
     'enableRateLimit': True,
     'options': {
         'defaultType': 'spot',
@@ -39,6 +59,8 @@ exchange = ccxt.bitget({
 # === TELEGRAM ALERT ===
 def send_telegram(message):
     try:
+        telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
+        telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
         url = f'https://api.telegram.org/bot{telegram_token}/sendMessage'
         payload = {
             'chat_id': telegram_chat_id,
@@ -56,7 +78,6 @@ def log_trade(msg):
 # === MARKET ORDER TRADING ===
 def place_order():
     global total_volume
-
     try:
         ticker = exchange.fetch_ticker(symbol)
         market_price = ticker['last']
